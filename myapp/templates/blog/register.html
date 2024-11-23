@@ -1,0 +1,45 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}注册 - 我的博客{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">注册新账号</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {% if error_message %}
+                    <div class="alert alert-danger">
+                        {{ error_message }}
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">用户名</label>
+                        <input type="text" name="username" class="form-control" id="id_username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">邮箱</label>
+                        <input type="email" name="email" class="form-control" id="id_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password1" class="form-label">密码</label>
+                        <input type="password" name="password1" class="form-control" id="id_password1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password2" class="form-label">确认密码</label>
+                        <input type="password" name="password2" class="form-control" id="id_password2" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">注册</button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small>已有账号？<a href="{% url 'login' %}">立即登录</a></small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'blog/base.html' %}
+{% load custom_filters %}
+
+{% block title %}首页 - 我的博客{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 文章列表 -->
+    <div class="col-md-8">
+        <div class="mb-4">
+            <h1 class="display-5 fw-bold animate-fade-in">
+                <i class="fas fa-newspaper me-2"></i>最新文章
+            </h1>
+            <hr class="my-4">
+        </div>
+
+        {% for post in posts %}
+        <article class="card post-card animate-fade-in" style="animation-delay: {{ forloop.counter0|multiply:0.1 }}s">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <a href="{% url 'post_detail' post.id %}" class="text-decoration-none text-dark">
+                        {{ post.title }}
+                    </a>
+                </h2>
+                <div class="card-subtitle mb-2 text-muted">
+                    <small>
+                        <i class="fas fa-user me-1"></i>
+                        <a href="{% url 'user_posts' post.author.username %}" class="text-decoration-none text-muted">
+                            {{ post.author.username }}
+                        </a> | 
+                        <i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y-m-d H:i" }} | 
+                        <i class="fas fa-folder me-1"></i>
+                        <a href="{% url 'category_posts' post.category.id %}" class="category-badge text-decoration-none">
+                            {{ post.category.name }}
+                        </a>
+                    </small>
+                </div>
+                <p class="card-text">{{ post.content|truncatewords:50 }}</p>
+                <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">
+                    <i class="fas fa-book-reader me-1"></i>阅读全文
+                </a>
+            </div>
+        </article>
+        {% empty %}
+        <div class="alert alert-info animate-fade-in" role="alert">
+            <i class="fas fa-info-circle me-2"></i>暂无文章
+        </div>
+        {% endfor %}
+
+        {% if posts.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if posts.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.previous_page_number }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in posts.paginator.page_range %}
+                <li class="page-item {% if posts.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if posts.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.next_page_number }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="col-md-4">
+        <!-- 分类列表 -->
+        <div class="card mb-4 animate-fade-in" style="animation-delay: 0.2s">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-tags me-2"></i>文章分类
+                </h5>
+                <hr>
+                <div class="list-group list-group-flush">
+                    {% for category in categories %}
+                    <a href="{% url 'category_posts' category.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        {{ category.name }}
+                        <span class="badge bg-primary rounded-pill">
+                            {{ category.post_set.count }}
+                        </span>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted mb-0">暂无分类</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于博客 -->
+        <div class="card animate-fade-in" style="animation-delay: 0.3s">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>关于博客
+                </h5>
+                <hr>
+                <p class="card-text">
+                    欢迎来到我的博客！这里记录着我的技术探索、学习心得和生活感悟。
+                </p>
+                {% if not user.is_authenticated %}
+                <div class="d-grid gap-2">
+                    <a href="{% url 'register' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-1"></i>立即注册
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

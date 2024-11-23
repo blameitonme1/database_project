@@ -1,0 +1,80 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ author.username }}的文章 - 我的博客{% endblock %}
+
+{% block content %}
+<div class="user-header mb-4">
+    <h1>{{ author.username }}的文章</h1>
+    {% if is_self %}
+    <div class="mb-3">
+        <a href="{% url 'create_post' %}" class="btn btn-primary">写新文章</a>
+    </div>
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if status == 'published' %}active{% endif %}" href="?status=published">已发布</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status == 'draft' %}active{% endif %}" href="?status=draft">草稿</a>
+        </li>
+    </ul>
+    {% endif %}
+</div>
+
+<div class="posts">
+    {% for post in posts %}
+    <div class="card post-card">
+        <div class="card-body">
+            <h2 class="card-title">
+                <a href="{% url 'post_detail' post.id %}" class="text-decoration-none text-dark">
+                    {{ post.title }}
+                </a>
+                {% if post.status == 'draft' %}
+                <span class="badge bg-warning text-dark">草稿</span>
+                {% endif %}
+            </h2>
+            <div class="card-subtitle mb-2 text-muted">
+                <small>
+                    发布时间: {{ post.published_at|date:"Y-m-d H:i" }} | 
+                    分类: <a href="{% url 'category_posts' post.category.id %}" class="text-decoration-none">{{ post.category.name }}</a>
+                </small>
+            </div>
+            <p class="card-text">{{ post.content|truncatewords:50 }}</p>
+            <div class="btn-group">
+                <a href="{% url 'post_detail' post.id %}" class="btn btn-primary btn-sm">阅读全文</a>
+                {% if is_self %}
+                <a href="{% url 'edit_post' post.id %}" class="btn btn-outline-primary btn-sm">编辑</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+        暂无文章
+    </div>
+    {% endfor %}
+</div>
+
+{% if posts.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if posts.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ posts.previous_page_number }}{% if status %}&status={{ status }}{% endif %}">上一页</a>
+        </li>
+        {% endif %}
+
+        {% for num in posts.paginator.page_range %}
+        <li class="page-item {% if posts.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if status %}&status={{ status }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if posts.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ posts.next_page_number }}{% if status %}&status={{ status }}{% endif %}">下一页</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
