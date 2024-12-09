@@ -1,0 +1,247 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}个人资料{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <h1>{{ request.user.username }}</h1>
+            <p class="join-date">加入时间：{{ request.user.date_joined|date:"Y年m月d日" }}</p>
+        </div>
+    </div>
+
+    <div class="profile-stats">
+        <div class="stat-box">
+            <div class="stat-icon">📝</div>
+            <h3>我的文章</h3>
+            <span class="stat-number">{{ request.user.post_set.count }}</span>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">🕒</div>
+            <h3>最近活动</h3>
+            <span class="stat-number">{{ request.user.last_login|date:"Y-m-d" }}</span>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="recent-posts">
+            <div class="section-header">
+                <h2>最近发布的文章</h2>
+                <div class="header-line"></div>
+            </div>
+            {% if request.user.post_set.all %}
+                <ul class="posts-list">
+                {% for post in request.user.post_set.all|slice:":5" %}
+                    <li class="post-item">
+                        <div class="post-info">
+                            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+                            <span class="post-date">{{ post.created_at|date:"Y-m-d" }}</span>
+                        </div>
+                        <div class="post-arrow">→</div>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <div class="no-posts">
+                    <span class="empty-icon">📭</span>
+                    <p>还没有发布任何文章</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 30px;
+        background: linear-gradient(145deg, #ffffff, #f6f8fa);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid rgba(0,0,0,0.05);
+    }
+
+    .profile-info h1 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 2.5em;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: linear-gradient(120deg, #2b6cb0, #4299e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .join-date {
+        color: #718096;
+        margin-top: 10px;
+        font-size: 1.1em;
+        font-weight: 500;
+    }
+
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .stat-box {
+        padding: 25px;
+        background: white;
+        border-radius: 16px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .stat-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        font-size: 2em;
+        margin-bottom: 15px;
+    }
+
+    .stat-box h3 {
+        margin: 0;
+        color: #4a5568;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 1.8em;
+        color: #2b6cb0;
+        font-weight: 700;
+        margin-top: 10px;
+    }
+
+    .profile-content {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .section-header h2 {
+        color: #2d3748;
+        margin: 0;
+        font-size: 1.5em;
+        font-weight: 700;
+    }
+
+    .header-line {
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(to right, #4299e1, transparent);
+        margin-left: 20px;
+    }
+
+    .posts-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .post-item {
+        padding: 20px;
+        margin-bottom: 15px;
+        background: #f8fafc;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .post-item:hover {
+        background: #edf2f7;
+        transform: translateX(5px);
+    }
+
+    .post-info {
+        flex: 1;
+    }
+
+    .post-info a {
+        color: #2d3748;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: color 0.3s ease;
+    }
+
+    .post-info a:hover {
+        color: #4299e1;
+    }
+
+    .post-date {
+        display: block;
+        color: #718096;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    .post-arrow {
+        color: #a0aec0;
+        font-size: 1.2em;
+        transition: transform 0.3s ease;
+    }
+
+    .post-item:hover .post-arrow {
+        transform: translateX(5px);
+        color: #4299e1;
+    }
+
+    .no-posts {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .empty-icon {
+        font-size: 3em;
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .no-posts p {
+        color: #718096;
+        font-size: 1.1em;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .profile-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-info h1 {
+            font-size: 2em;
+        }
+    }
+</style>
+{% endblock %}

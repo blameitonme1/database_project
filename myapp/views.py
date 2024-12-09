@@ -54,12 +54,40 @@ def category_posts(request, category_id):
     })
 
 @login_required
+def create_category(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        
+        if name:
+            category = Category.objects.create(
+                name=name,
+                description=description
+            )
+            messages.success(request, '分类已创建')
+            return redirect('create_post')
+        else:
+            messages.error(request, '请填写分类名称')
+    
+    return redirect('create_post')
+
+@login_required
 def create_post(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         content = request.POST.get('content')
         category_id = request.POST.get('category')
-        status = request.POST.get('status', 'draft')  # 获取用户选择的状态
+        new_category = request.POST.get('new_category')
+        new_category_desc = request.POST.get('new_category_description', '')
+        status = request.POST.get('status', 'draft')
+        
+        # 处理新分类的创建
+        if new_category:
+            category = Category.objects.create(
+                name=new_category,
+                description=new_category_desc
+            )
+            category_id = category.id
         
         if title and content and category_id:
             category = get_object_or_404(Category, id=category_id)
@@ -192,3 +220,6 @@ def custom_logout(request):
     logout(request)
     messages.success(request, '您已成功退出登录')
     return redirect('blog_index')
+
+def profile_view(request):
+    return render(request, 'accounts/profile.html')

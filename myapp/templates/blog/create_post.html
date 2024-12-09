@@ -13,13 +13,35 @@
                 <input type="text" class="form-control" id="title" name="title" required>
             </div>
             <div class="mb-3">
-                <label for="category" class="form-label">分类</label>
-                <select class="form-select" id="category" name="category" required>
-                    <option value="">选择分类</option>
-                    {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label">分类</label>
+                <div class="row">
+                    <div class="col">
+                        <select class="form-select" id="category" name="category">
+                            <option value="">选择分类</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-primary" onclick="toggleNewCategory()">新建分类</button>
+                    </div>
+                </div>
+            </div>
+            <div id="newCategoryForm" class="mb-3" style="display: none;">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">新建分类</h5>
+                        <div class="mb-3">
+                            <label for="new_category" class="form-label">分类名称</label>
+                            <input type="text" class="form-control" id="new_category" name="new_category">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_category_description" class="form-label">分类描述</label>
+                            <textarea class="form-control" id="new_category_description" name="new_category_description" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="content" class="form-label">内容</label>
@@ -36,4 +58,18 @@
         </form>
     </div>
 </div>
+
+<script>
+function toggleNewCategory() {
+    const newCategoryForm = document.getElementById('newCategoryForm');
+    const categorySelect = document.getElementById('category');
+    if (newCategoryForm.style.display === 'none') {
+        newCategoryForm.style.display = 'block';
+        categorySelect.removeAttribute('required');
+    } else {
+        newCategoryForm.style.display = 'none';
+        categorySelect.setAttribute('required', 'required');
+    }
+}
+</script>
 {% endblock %}

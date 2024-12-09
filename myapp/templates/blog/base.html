@@ -59,6 +59,7 @@
             width: 100%;
             padding: 2rem 0;
             position: relative;
+            margin-bottom: 60px; /* 添加底部边距，为页脚留出空间 */
         }
 
         /* 卡片样式增强 */
@@ -107,14 +108,14 @@
             z-index: 1000;
         }
 
-        /* 页脚样式增强 */
+        /* 页脚样式 */
         .footer {
+            flex-shrink: 0;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 2rem 0;
+            padding: 1rem 0;
             position: relative;
-            z-index: 1;
+            width: 100%;
+            box-shadow: 0 -4px 6px rgba(0,0,0,0.1);
         }
 
         /* 动画效果增强 */
