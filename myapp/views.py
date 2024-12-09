@@ -216,6 +216,12 @@ def delete_post(request, post_id):
     return redirect('post_detail', post_id=post_id)
 
 @login_required
+def delete_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    category.delete()
+    return redirect('blog_index')
+
+@login_required
 def custom_logout(request):
     logout(request)
     messages.success(request, '您已成功退出登录')

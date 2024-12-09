@@ -36,6 +36,12 @@
                 <small>
                     发布时间: {{ post.published_at|date:"Y-m-d H:i" }} | 
                     分类: <a href="{% url 'category_posts' post.category.id %}" class="text-decoration-none">{{ post.category.name }}</a>
+                    {% if is_self %}
+                    <div class="category-item">
+                        <span>{{ post.category.name }}</span>
+                        <a href="{% url 'delete_category' post.category.id %}" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除这个分类吗？')">删除</a>
+                    </div>
+                    {% endif %}
                 </small>
             </div>
             <p class="card-text">{{ post.content|truncatewords:50 }}</p>

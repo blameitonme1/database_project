@@ -30,9 +30,9 @@
                         </a> | 
                         <i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y-m-d H:i" }} | 
                         <i class="fas fa-folder me-1"></i>
-                        <a href="{% url 'category_posts' post.category.id %}" class="category-badge text-decoration-none">
-                            {{ post.category.name }}
-                        </a>
+                        {% if post.category %}
+                        <a href="{% url 'category_posts' post.category.id %}" class="category-badge text-decoration-none">{{ post.category.name }}</a>
+                        {% endif %}
                     </small>
                 </div>
                 <p class="card-text">{{ post.content|truncatewords:50 }}</p>
