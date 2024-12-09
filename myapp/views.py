@@ -226,7 +226,13 @@ def delete_post(request, post_id):
 @login_required
 def delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
+    
+    # 先删除该分类下的所有文章
+    Post.objects.filter(category=category).delete()
+    
+    # 然后删除分类
     category.delete()
+    messages.success(request, '分类及其所有文章已删除')
     return redirect('blog_index')
 
 @login_required
