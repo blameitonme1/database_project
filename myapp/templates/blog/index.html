@@ -4,70 +4,80 @@
 {% block title %}首页 - 我的博客{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row g-5">
     <!-- 文章列表 -->
-    <div class="col-md-8">
-        <div class="mb-4">
-            <h1 class="display-5 fw-bold animate-fade-in">
-                <i class="fas fa-newspaper me-2"></i>最新文章
-            </h1>
-            <hr class="my-4">
-        </div>
-
-        {% for post in posts %}
-        <article class="card post-card animate-fade-in" style="animation-delay: {{ forloop.counter0|multiply:0.1 }}s">
-            <div class="card-body">
-                <h2 class="card-title">
-                    <a href="{% url 'post_detail' post.id %}" class="text-decoration-none text-dark">
-                        {{ post.title }}
-                    </a>
-                </h2>
-                <div class="card-subtitle mb-2 text-muted">
-                    <small>
-                        <i class="fas fa-user me-1"></i>
-                        <a href="{% url 'user_posts' post.author.username %}" class="text-decoration-none text-muted">
-                            {{ post.author.username }}
-                        </a> | 
-                        <i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y-m-d H:i" }} | 
-                        <i class="fas fa-folder me-1"></i>
+    <div class="col-lg-8">
+        <h1 class="display-5 fw-bold mb-4 animate-fade-in">
+            <i class="fas fa-newspaper me-2"></i>最新文章
+        </h1>
+        
+        <div class="posts-grid">
+            {% for post in posts %}
+            <article class="card shadow-sm hover-card animate-fade-in mb-4" 
+                     style="animation-delay: {{ forloop.counter0|multiply:0.1 }}s">
+                <div class="card-body p-4">
+                    <div class="post-meta small text-muted mb-2">
+                        <span><i class="fas fa-calendar-alt me-1"></i>{{ post.published_at|date:"Y-m-d" }}</span>
+                        <span class="mx-2">·</span>
+                        <span><i class="fas fa-user-circle me-1"></i>{{ post.author.username }}</span>
                         {% if post.category %}
-                        <a href="{% url 'category_posts' post.category.id %}" class="category-badge text-decoration-none">{{ post.category.name }}</a>
+                        <span class="mx-2">·</span>
+                        <span><i class="fas fa-folder me-1"></i>{{ post.category.name }}</span>
                         {% endif %}
-                    </small>
+                    </div>
+                    
+                    <h2 class="card-title h4 mb-3">
+                        <a href="{% url 'post_detail' post.id %}" class="text-decoration-none link-dark">
+                            {{ post.title }}
+                        </a>
+                    </h2>
+                    
+                    <p class="card-text text-muted mb-3">
+                        {{ post.content|truncatewords:30 }}
+                    </p>
+                    
+                    <a href="{% url 'post_detail' post.id %}" class="btn btn-outline-primary btn-sm">
+                        阅读全文 <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
-                <p class="card-text">{{ post.content|truncatewords:50 }}</p>
-                <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">
-                    <i class="fas fa-book-reader me-1"></i>阅读全文
-                </a>
+            </article>
+            {% empty %}
+            <div class="alert alert-info text-center" role="alert">
+                <i class="fas fa-info-circle fa-lg me-2"></i>暂无文章
             </div>
-        </article>
-        {% empty %}
-        <div class="alert alert-info animate-fade-in" role="alert">
-            <i class="fas fa-info-circle me-2"></i>暂无文章
+            {% endfor %}
         </div>
-        {% endfor %}
 
+        <!-- 分页导航 -->
         {% if posts.has_other_pages %}
         <nav aria-label="Page navigation" class="mt-4">
             <ul class="pagination justify-content-center">
                 {% if posts.has_previous %}
                 <li class="page-item">
+                    <a class="page-link" href="?page=1" title="首页">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
                     <a class="page-link" href="?page={{ posts.previous_page_number }}">
-                        <i class="fas fa-chevron-left"></i>
+                        <i class="fas fa-angle-left"></i>
                     </a>
                 </li>
                 {% endif %}
 
-                {% for num in posts.paginator.page_range %}
-                <li class="page-item {% if posts.number == num %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                <li class="page-item disabled">
+                    <span class="page-link">{{ posts.number }}/{{ posts.paginator.num_pages }}</span>
                 </li>
-                {% endfor %}
 
                 {% if posts.has_next %}
                 <li class="page-item">
                     <a class="page-link" href="?page={{ posts.next_page_number }}">
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.paginator.num_pages }}" title="末页">
+                        <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
                 {% endif %}
@@ -77,7 +87,7 @@
     </div>
 
     <!-- 侧边栏 -->
-    <div class="col-md-4">
+    <div class="col-lg-4">
         <!-- 分类列表 -->
         <div class="card mb-4 animate-fade-in" style="animation-delay: 0.2s">
             <div class="card-body">
@@ -121,4 +131,21 @@
         </div>
     </div>
 </div>
+
+{% block extra_css %}
+<style>
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.post-meta span {
+    display: inline-block;
+}
+</style>
+{% endblock %}
 {% endblock %}

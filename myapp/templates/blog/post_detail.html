@@ -4,42 +4,35 @@
 {% block title %}{{ post.title }} - 我的博客{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row g-5">
+    <!-- 主要内容区 -->
     <div class="col-lg-8">
-        <!-- 文章内容 -->
-        <article class="card post-card animate-fade-in">
-            <div class="card-body">
-                <h1 class="card-title mb-4">{{ post.title }}</h1>
-                <div class="card-subtitle mb-4">
-                    <div class="d-flex align-items-center text-muted">
-                        <div class="me-3">
-                            <i class="fas fa-user me-1"></i>
-                            <a href="{% url 'user_posts' post.author.username %}" class="text-decoration-none text-muted">
-                                {{ post.author.username }}
-                            </a>
-                        </div>
-                        <div class="me-3">
-                            <i class="fas fa-clock me-1"></i>
-                            {{ post.published_at|date:"Y-m-d H:i" }}
-                        </div>
-                        <div>
-                            <i class="fas fa-folder me-1"></i>
-                            <a href="{% url 'category_posts' post.category.id %}" class="category-badge text-decoration-none">
-                                {{ post.category.name }}
-                            </a>
-                        </div>
+        <!-- 文章内容卡片 -->
+        <article class="card shadow-sm hover-shadow animate-fade-in">
+            <div class="card-body p-md-5">
+                <!-- 文章标题和元信息 -->
+                <header class="mb-4">
+                    <h1 class="display-4 fw-bold mb-4">{{ post.title }}</h1>
+                    <div class="d-flex flex-wrap gap-3 text-muted small">
+                        <span><i class="fas fa-user-circle me-1"></i>{{ post.author.username }}</span>
+                        <span><i class="fas fa-calendar-alt me-1"></i>{{ post.published_at|date:"Y-m-d H:i" }}</span>
+                        <span><i class="fas fa-folder me-1"></i>{{ post.category.name }}</span>
                     </div>
-                </div>
-                <div class="card-text mb-4">
+                </header>
+                
+                <!-- 文章内容 -->
+                <div class="article-content prose prose-lg my-4">
                     {{ post.content|linebreaks }}
                 </div>
+
+                <!-- 文章操作按钮 -->
                 {% if user == post.author %}
-                <div class="btn-group">
+                <div class="d-flex gap-2 mt-4">
                     <a href="{% url 'edit_post' post.id %}" class="btn btn-outline-primary">
-                        <i class="fas fa-edit me-1"></i>编辑文章
+                        <i class="fas fa-edit me-1"></i>编辑
                     </a>
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="fas fa-trash-alt me-1"></i>删除文章
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="fas fa-trash me-1"></i>删除
                     </button>
                 </div>
                 {% endif %}
@@ -47,44 +40,68 @@
         </article>
 
         <!-- 评论区 -->
-        <div class="card mt-4 animate-fade-in" style="animation-delay: 0.2s">
-            <div class="card-body">
-                <h4 class="card-title mb-4">
+        <div class="card shadow-sm mt-4 animate-fade-in">
+            <div class="card-body p-4">
+                <h3 class="card-title h4 mb-4">
                     <i class="fas fa-comments me-2"></i>评论区
-                </h4>
+                </h3>
                 
                 {% if user.is_authenticated %}
                 <form method="post" class="mb-4">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="content" class="form-label">发表评论</label>
-                        <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                        <textarea class="form-control" name="content" rows="3" 
+                                placeholder="写下你的评论..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-1"></i>提交评论
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-paper-plane me-1"></i>发表评论
                     </button>
                 </form>
-                {% else %}
-                <div class="alert alert-info" role="alert">
-                    <i class="fas fa-info-circle me-2"></i>
-                    请<a href="{% url 'login' %}" class="alert-link">登录</a>后发表评论
-                </div>
                 {% endif %}
 
+                <!-- 修改评论列表部分 -->
                 <div class="comments mt-4">
                     {% for comment in comments %}
-                    <div class="comment animate-fade-in" style="animation-delay: {{ forloop.counter0|multiply:0.1 }}s">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <strong>{{ comment.author.username }}</strong>
-                                <small class="text-muted ms-2">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                    <div class="comment-item animate-fade-in" style="animation-delay: {{ forloop.counter0|multiply:0.1 }}s">
+                        <div class="d-flex gap-3">
+                            <div class="flex-shrink-0">
+                                <div class="avatar">{{ comment.author.username|first|upper }}</div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ comment.author.username }}</h6>
+                                        <p class="mb-1">{{ comment.content }}</p>
+                                        <small class="text-muted">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                    {% if user == comment.author or user == post.author %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-link btn-sm text-muted" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form method="post" action="{% url 'delete_comment' comment.id %}" 
+                                                      onsubmit="return confirm('确定要删除这条评论吗？');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="fas fa-trash-alt me-1"></i>删除评论
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                        <p class="mb-0">{{ comment.content }}</p>
-                        <hr>
+                        <hr class="my-3">
                     </div>
                     {% empty %}
-                    <p class="text-muted text-center mb-0">暂无评论</p>
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-comments fa-2x mb-2"></i>
+                        <p class="mb-0">暂无评论，来说两句吧~</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -161,4 +178,72 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.hover-shadow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.prose {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.comment-item:not(:last-child) {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* 修复布局问题 */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.comment-item:last-child hr {
+    display: none;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.btn-link {
+    color: #6c757d;
+    padding: 0;
+}
+
+.btn-link:hover {
+    color: #000;
+}
+
+/* 确保内容区域不会被遮挡 */
+.container {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.row.g-5 {
+    margin-top: 0 !important;
+}
+</style>
 {% endblock %}

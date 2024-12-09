@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from .models import Post, Category, Comment
 from django.utils import timezone
-
+from django.http import Http404
 def blog_index(request):
     posts = Post.objects.filter(status='published').order_by('-published_at')
     categories = Category.objects.all()
@@ -21,24 +21,32 @@ def blog_index(request):
     })
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id, status='published')
-    comments = post.comments.filter(is_approved=True)
+    # 修改查询逻辑，允许作者查看自己的草稿
+    post = get_object_or_404(Post, id=post_id)
+    
+    # 如果文章是草稿且访问者不是作者，返回404
+    if post.status == 'draft' and post.author != request.user:
+        raise Http404("文章不存在")
+    
+    comments = post.comments.all().order_by('-created_at')
     
     if request.method == 'POST' and request.user.is_authenticated:
         content = request.POST.get('content')
         if content:
-            Comment.objects.create(
+            comment = Comment.objects.create(
                 post=post,
                 author=request.user,
-                content=content
+                content=content,
+                is_approved=True
             )
-            messages.success(request, '评论已提交，等待审核')
+            messages.success(request, '评论已发布')
             return redirect('post_detail', post_id=post.id)
     
-    return render(request, 'blog/post_detail.html', {
+    context = {
         'post': post,
         'comments': comments,
-    })
+    }
+    return render(request, 'blog/post_detail.html', context)
 
 def category_posts(request, category_id):
     category = get_object_or_404(Category, id=category_id)
@@ -220,6 +228,23 @@ def delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     category.delete()
     return redirect('blog_index')
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # 检查是否是评论作者或文章作者
+    if request.user != comment.author and request.user != comment.post.author:
+        messages.error(request, '你没有权限删除这条评论')
+        return redirect('post_detail', post_id=comment.post.id)
+    
+    if request.method == 'POST':
+        post_id = comment.post.id
+        comment.delete()
+        messages.success(request, '评论已删除')
+        return redirect('post_detail', post_id=post_id)
+    
+    return redirect('post_detail', post_id=comment.post.id)
 
 @login_required
 def custom_logout(request):
